@@ -8,5 +8,12 @@ body {
 }
 
 canvas {
-    border: 1px solid #000;
-}
+    border: 1px solid black;
+    cursor: pointer;
+  }
+  .controls {
+    margin: 10px 0;
+  }
+  .controls button {
+    margin-right: 5px;
+  }

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Room Furniture Layout</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+      }
+      canvas {
+        border: 1px solid black;
+        cursor: pointer;
+      }
+      .controls {
+        margin: 10px 0;
+      }
+      .controls button {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Room Furniture Layout</h1>
+    <div class="controls">
+      <button id="add-chair">Add Chair</button>
+      <button id="add-table">Add Table</button>
+      <button id="delete">Delete Selected</button>
+      <button id="group-chairs">Group Chairs</button>
+    </div>
+    <canvas id="roomCanvas" width="800" height="600"></canvas>
+
+    <script>
+      const canvas = document.getElementById("roomCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let furniture = [];
+      let selected = null;
+      let offsetX, offsetY;
+
+      class Furniture {
+        constructor(x, y, width, height, type) {
+          this.x = x;
+          this.y = y;
+          this.width = width;
+          this.height = height;
+          this.type = type;
+          this.group = null; // For chair grouping
+        }
+
+        draw() {
+          ctx.fillStyle =
+            this.type === "chair" ? (this.group ? "green" : "blue") : "brown";
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+          ctx.strokeRect(this.x, this.y, this.width, this.height);
+        }
+
+        isInside(x, y) {
+          return (
+            x > this.x &&
+            x < this.x + this.width &&
+            y > this.y &&
+            y < this.y + this.height
+          );
+        }
+
+        checkCollision(x, y, width, height) {
+          return (
+            this.x < x + width &&
+            this.x + this.width > x &&
+            this.y < y + height &&
+            this.y + this.height > y
+          );
+        }
+      }
+
+      function drawRoom() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        furniture.forEach((item) => item.draw());
+      }
+
+      function checkOverlaps(item) {
+        return furniture.some(
+          (other) =>
+            other !== item &&
+            other.checkCollision(item.x, item.y, item.width, item.height)
+        );
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        const mouseX = e.offsetX;
+        const mouseY = e.offsetY;
+
+        selected = furniture.find((item) => item.isInside(mouseX, mouseY));
+        if (selected && selected.group) {
+          offsetX = mouseX - selected.x;
+          offsetY = mouseY - selected.y;
+        }
+      });
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (selected) {
+          if (selected.group) {
+            const groupItems = furniture.filter(
+              (item) => item.group === selected.group
+            );
+            const originalPositions = groupItems.map((item) => ({
+              x: item.x,
+              y: item.y,
+            }));
+            const deltaX = e.offsetX - offsetX - selected.x;
+            const deltaY = e.offsetY - offsetY - selected.y;
+
+            groupItems.forEach((item) => {
+              item.x += deltaX;
+              item.y += deltaY;
+            });
+
+            if (groupItems.some((item) => checkOverlaps(item))) {
+              groupItems.forEach((item, index) => {
+                item.x = originalPositions[index].x;
+                item.y = originalPositions[index].y;
+              });
+            } else {
+              offsetX += deltaX;
+              offsetY += deltaY;
+            }
+          } else {
+            const originalX = selected.x;
+            const originalY = selected.y;
+            selected.x = e.offsetX - offsetX;
+            selected.y = e.offsetY - offsetY;
+
+            if (checkOverlaps(selected)) {
+              selected.x = originalX;
+              selected.y = originalY;
+            }
+          }
+          drawRoom();
+        }
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        selected = null;
+      });
+
+      document.getElementById("add-chair").addEventListener("click", () => {
+        const newChair = new Furniture(50, 50, 50, 50, "chair");
+        if (!checkOverlaps(newChair)) {
+          furniture.push(newChair);
+        }
+        drawRoom();
+      });
+
+      document.getElementById("add-table").addEventListener("click", () => {
+        const newTable = new Furniture(100, 100, 100, 100, "table");
+        if (!checkOverlaps(newTable)) {
+          furniture.push(newTable);
+        }
+        drawRoom();
+      });
+
+      document.getElementById("delete").addEventListener("click", () => {
+        if (selected) {
+          if (selected.group) {
+            furniture = furniture.filter(
+              (item) => item.group !== selected.group
+            );
+          } else {
+            furniture = furniture.filter((item) => item !== selected);
+          }
+          selected = null;
+          drawRoom();
+        }
+      });
+
+      document.getElementById("group-chairs").addEventListener("click", () => {
+        const chairs = furniture.filter(
+          (item) => item.type === "chair" && !item.group
+        );
+        if (chairs.length > 1) {
+          const groupId = Date.now(); // Unique group ID
+          chairs.forEach((chair) => (chair.group = groupId));
+        }
+        drawRoom();
+      });
+
+      drawRoom();
+    </script>
+  </body>
+</html>
