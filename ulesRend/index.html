@@ -7,7 +7,18 @@
     <title>Szalagavató ülésrend tervező</title>
   </head>
   <body>
-    <div id="container"></div>
+    <div id="container">
+      <button id="szek">Szék Hozzáadása</button>
+      <button id="asztal">Asztal Hozzáadása</button>
+      <label for="rows">Sorok:</label>
+      <input id="rows" type="number" min="1" value="3" />
+      <label for="cols">Oszlopok:</label>
+      <input id="cols" type="number" min="1" value="3" />
+      <label for="spacing">Hely (px):</label>
+      <input id="spacing" type="number" min="0" value="10" />
+      <button id="csoport">Csoportosítás</button>
+      <button id="torles">Törlés Mód</button>
+    </div>
     <!-- <button onclick="legyen()">Új cucc</button> -->
     <canvas id="aula"></canvas>
     <script src="script.js"></script>

@@ -1,196 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Room Furniture Layout</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0;
-        padding: 0;
-      }
-      canvas {
-        border: 1px solid black;
-        cursor: pointer;
-      }
-      .controls {
-        margin: 10px 0;
-      }
-      .controls button {
-        margin-right: 5px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Room Furniture Layout</h1>
-    <div class="controls">
-      <button id="add-chair">Add Chair</button>
-      <button id="add-table">Add Table</button>
-      <button id="delete">Delete Selected</button>
-      <button id="group-chairs">Group Chairs</button>
-    </div>
-    <canvas id="roomCanvas" width="800" height="600"></canvas>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaktív Tervező</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+    button {
+      margin: 5px;
+    }
+    input {
+      width: 50px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="aula"></canvas>
+  <div>
+    <button id="szek">Szék Hozzáadása</button>
+    <button id="asztal">Asztal Hozzáadása</button>
+    <label for="rows">Sorok:</label>
+    <input id="rows" type="number" min="1" value="3">
+    <label for="cols">Oszlopok:</label>
+    <input id="cols" type="number" min="1" value="3">
+    <label for="spacing">Hely (px):</label>
+    <input id="spacing" type="number" min="0" value="10">
+    <button id="csoport">Csoportosítás</button>
+    <button id="torles">Törlés Mód</button>
+  </div>
+  <script>
+    const canvas = document.getElementById("aula");
+    const tartalom = canvas.getContext("2d");
 
-    <script>
-      const canvas = document.getElementById("roomCanvas");
-      const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth / 2;
+    canvas.height = window.innerHeight - 15;
 
-      let furniture = [];
-      let selected = null;
-      let offsetX, offsetY;
+    let targyak = [];
+    let selected = null;
+    let offsetX, offsetY;
+    let deleteMode = false; // Törlési mód jelző
 
-      class Furniture {
-        constructor(x, y, width, height, type) {
-          this.x = x;
-          this.y = y;
-          this.width = width;
-          this.height = height;
-          this.type = type;
-          this.group = null; // For chair grouping
-        }
-
-        draw() {
-          ctx.fillStyle =
-            this.type === "chair" ? (this.group ? "green" : "blue") : "brown";
-          ctx.fillRect(this.x, this.y, this.width, this.height);
-          ctx.strokeRect(this.x, this.y, this.width, this.height);
-        }
-
-        isInside(x, y) {
-          return (
-            x > this.x &&
-            x < this.x + this.width &&
-            y > this.y &&
-            y < this.y + this.height
-          );
-        }
-
-        checkCollision(x, y, width, height) {
-          return (
-            this.x < x + width &&
-            this.x + this.width > x &&
-            this.y < y + height &&
-            this.y + this.height > y
-          );
-        }
+    class Targy {
+      constructor(x, y, width, height, tipus) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.tipus = tipus;
+        this.group = null; // Csoportazonosító (nem használt a különálló mozgatáshoz)
       }
 
-      function drawRoom() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        furniture.forEach((item) => item.draw());
+      draw() {
+        tartalom.fillStyle = this.tipus === "chair" ? "blue" : "brown";
+        tartalom.fillRect(this.x, this.y, this.width, this.height);
+        tartalom.strokeRect(this.x, this.y, this.width, this.height);
       }
 
-      function checkOverlaps(item) {
-        return furniture.some(
-          (other) =>
-            other !== item &&
-            other.checkCollision(item.x, item.y, item.width, item.height)
+      isInside(x, y) {
+        return (
+          x > this.x &&
+          x < this.x + this.width &&
+          y > this.y &&
+          y < this.y + this.height
         );
       }
 
-      canvas.addEventListener("mousedown", (e) => {
-        const mouseX = e.offsetX;
-        const mouseY = e.offsetY;
+      checkCollision(x, y, width, height) {
+        return (
+          this.x < x + width &&
+          this.x + this.width > x &&
+          this.y < y + height &&
+          this.y + this.height > y
+        );
+      }
+    }
 
-        selected = furniture.find((item) => item.isInside(mouseX, mouseY));
-        if (selected && selected.group) {
+    function drawRoom() {
+      tartalom.clearRect(0, 0, canvas.width, canvas.height);
+      targyak.forEach((item) => item.draw());
+    }
+
+    function checkOverlaps(item) {
+      return targyak.some(
+        (other) =>
+          other !== item &&
+          other.checkCollision(item.x, item.y, item.width, item.height)
+      );
+    }
+
+    canvas.addEventListener("mousedown", (e) => {
+      const mouseX = e.offsetX;
+      const mouseY = e.offsetY;
+
+      if (deleteMode) {
+        // Ha törlés módban vagyunk, töröljük a kiválasztott elemet
+        const toDelete = targyak.find((item) => item.isInside(mouseX, mouseY));
+        if (toDelete) {
+          targyak = targyak.filter((item) => item !== toDelete);
+          drawRoom();
+        }
+      } else {
+        // Normál mód - kijelölés és mozgatás
+        selected = targyak.find((item) => item.isInside(mouseX, mouseY));
+        if (selected) {
           offsetX = mouseX - selected.x;
           offsetY = mouseY - selected.y;
         }
-      });
+      }
+    });
 
-      canvas.addEventListener("mousemove", (e) => {
-        if (selected) {
-          if (selected.group) {
-            const groupItems = furniture.filter(
-              (item) => item.group === selected.group
-            );
-            const originalPositions = groupItems.map((item) => ({
-              x: item.x,
-              y: item.y,
-            }));
-            const deltaX = e.offsetX - offsetX - selected.x;
-            const deltaY = e.offsetY - offsetY - selected.y;
+    canvas.addEventListener("mousemove", (e) => {
+      if (!deleteMode && selected) {
+        const deltaX = e.offsetX - offsetX;
+        const deltaY = e.offsetY - offsetY;
 
-            groupItems.forEach((item) => {
-              item.x += deltaX;
-              item.y += deltaY;
-            });
+        const originalX = selected.x;
+        const originalY = selected.y;
+        selected.x = deltaX;
+        selected.y = deltaY;
 
-            if (groupItems.some((item) => checkOverlaps(item))) {
-              groupItems.forEach((item, index) => {
-                item.x = originalPositions[index].x;
-                item.y = originalPositions[index].y;
-              });
-            } else {
-              offsetX += deltaX;
-              offsetY += deltaY;
-            }
-          } else {
-            const originalX = selected.x;
-            const originalY = selected.y;
-            selected.x = e.offsetX - offsetX;
-            selected.y = e.offsetY - offsetY;
-
-            if (checkOverlaps(selected)) {
-              selected.x = originalX;
-              selected.y = originalY;
-            }
-          }
-          drawRoom();
+        if (checkOverlaps(selected)) {
+          selected.x = originalX;
+          selected.y = originalY;
         }
-      });
 
-      canvas.addEventListener("mouseup", () => {
-        selected = null;
-      });
-
-      document.getElementById("add-chair").addEventListener("click", () => {
-        const newChair = new Furniture(50, 50, 50, 50, "chair");
-        if (!checkOverlaps(newChair)) {
-          furniture.push(newChair);
-        }
         drawRoom();
-      });
+      }
+    });
 
-      document.getElementById("add-table").addEventListener("click", () => {
-        const newTable = new Furniture(100, 100, 100, 100, "table");
-        if (!checkOverlaps(newTable)) {
-          furniture.push(newTable);
-        }
-        drawRoom();
-      });
+    canvas.addEventListener("mouseup", () => {
+      if (!deleteMode) selected = null;
+    });
 
-      document.getElementById("delete").addEventListener("click", () => {
-        if (selected) {
-          if (selected.group) {
-            furniture = furniture.filter(
-              (item) => item.group !== selected.group
-            );
-          } else {
-            furniture = furniture.filter((item) => item !== selected);
-          }
-          selected = null;
-          drawRoom();
-        }
-      });
-
-      document.getElementById("group-chairs").addEventListener("click", () => {
-        const chairs = furniture.filter(
-          (item) => item.type === "chair" && !item.group
-        );
-        if (chairs.length > 1) {
-          const groupId = Date.now(); // Unique group ID
-          chairs.forEach((chair) => (chair.group = groupId));
-        }
-        drawRoom();
-      });
-
+    document.getElementById("szek").addEventListener("click", () => {
+      const newChair = new Targy(50, 50, 50, 50, "chair");
+      if (!checkOverlaps(newChair)) {
+        targyak.push(newChair);
+      }
       drawRoom();
-    </script>
-  </body>
+    });
+
+    document.getElementById("asztal").addEventListener("click", () => {
+      const newTable = new Targy(100, 100, 100, 100, "table");
+      if (!checkOverlaps(newTable)) {
+        targyak.push(newTable);
+      }
+      drawRoom();
+    });
+
+    document.getElementById("csoport").addEventListener("click", () => {
+      const rows = parseInt(document.getElementById("rows").value, 10) || 1;
+      const cols = parseInt(document.getElementById("cols").value, 10) || 1;
+      const spacing = parseInt(document.getElementById("spacing").value, 10) || 0;
+      const chairSize = 50;
+      const startX = 50;
+      const startY = 50;
+
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const newChair = new Targy(
+            startX + col * (chairSize + spacing),
+            startY + row * (chairSize + spacing),
+            chairSize,
+            chairSize,
+            "chair"
+          );
+          if (!checkOverlaps(newChair)) {
+            targyak.push(newChair);
+          }
+        }
+      }
+      drawRoom();
+    });
+
+    document.getElementById("torles").addEventListener("click", () => {
+      deleteMode = !deleteMode; // Kapcsolgatja a törlés módot
+      document.getElementById("torles").textContent = deleteMode 
+        ? "Törlés Mód: Bekapcsolva" 
+        : "Törlés Mód";
+    });
+
+    drawRoom();
+  </script>
+</body>
 </html>
