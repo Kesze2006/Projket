@@ -2,12 +2,13 @@ const canvas = document.getElementById("aula");
 const tartalom = canvas.getContext("2d");
 
 canvas.width = window.innerWidth / 2;
-canvas.height = window.innerHeight - 15;
+canvas.height = window.innerHeight - 100;
 
 let targyak = [];
 let selected = null;
 let offsetX, offsetY;
-let deleteMode = false; 
+let deleteMode = false; // Törlési mód jelző
+
 class Targy {
   constructor(x, y, width, height, tipus) {
     this.x = x;
@@ -15,11 +16,11 @@ class Targy {
     this.width = width;
     this.height = height;
     this.tipus = tipus;
-    this.group = null; 
+    this.group = null; // Csoportazonosító (nem használt a különálló mozgatáshoz)
   }
 
   draw() {
-    tartalom.fillStyle = this.tipus === "chair" ? "blue" : "brown";
+    tartalom.fillStyle = this.tipus === "chair" ? "bisque" : "brown";
     tartalom.fillRect(this.x, this.y, this.width, this.height);
     tartalom.strokeRect(this.x, this.y, this.width, this.height);
   }
@@ -61,12 +62,14 @@ canvas.addEventListener("mousedown", (e) => {
   const mouseY = e.offsetY;
 
   if (deleteMode) {
+    // Ha törlés módban vagyunk, töröljük a kiválasztott elemet
     const toDelete = targyak.find((item) => item.isInside(mouseX, mouseY));
     if (toDelete) {
       targyak = targyak.filter((item) => item !== toDelete);
       drawRoom();
     }
   } else {
+    // Normál mód - kijelölés és mozgatás
     selected = targyak.find((item) => item.isInside(mouseX, mouseY));
     if (selected) {
       offsetX = mouseX - selected.x;
@@ -117,7 +120,7 @@ document.getElementById("asztal").addEventListener("click", () => {
 document.getElementById("csoport").addEventListener("click", () => {
   const rows = parseInt(document.getElementById("rows").value, 10) || 1;
   const cols = parseInt(document.getElementById("cols").value, 10) || 1;
-  const spacing = parseInt(document.getElementById("spacing").value, 10) || 0;
+  const spacing = 5; // Fix távolság a székek között
   const chairSize = 50;
   const startX = 50;
   const startY = 50;
@@ -140,9 +143,9 @@ document.getElementById("csoport").addEventListener("click", () => {
 });
 
 document.getElementById("torles").addEventListener("click", () => {
-  deleteMode = !deleteMode; 
-  document.getElementById("torles").textContent = deleteMode
-    ? "Törlés Mód: Bekapcsolva"
+  deleteMode = !deleteMode; // Kapcsolgatja a törlés módot
+  document.getElementById("torles").textContent = deleteMode 
+    ? "Törlés Mód: Bekapcsolva" 
     : "Törlés Mód";
 });
 
