@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belépés</title>
+    <link rel="stylesheet" href="belepesStyles.css">
+    <script>
+        function toggleForm() {
+            const loginForm = document.getElementById("login-form");
+            const registerForm = document.getElementById("register-form");
+            loginForm.style.display = loginForm.style.display === "none" ? "block" : "none";
+            registerForm.style.display = registerForm.style.display === "none" ? "block" : "none";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="login-form">
+            <h2>Labirintus - Bejelentkezés</h2>
+            <form action="#" method="POST">
+                <input type="text" name="username" placeholder="Felhasználónév" required>
+                <input type="password" name="password" placeholder="Jelszó" required>
+                <button type="submit">Belépés</button>
+            </form>
+            <p class="toggle" onclick="toggleForm()">Nincs fiókod? Regisztrálj!</p>
+            <a href="game.html" class="play-link">Belépés a játékba</a>
+        </div>
+        <div id="register-form" style="display: none;">
+            <h2>Labirintus - Regisztráció</h2>
+            <form action="#" method="POST">
+                <input type="text" name="username" placeholder="Felhasználónév" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Jelszó" required>
+                <button type="submit">Regisztráció</button>
+            </form>
+            <p class="toggle" onclick="toggleForm()">Már van fiókod? Jelentkezz be!</p>
+            <a href="jatek.html" class="play-link">Belépés a játékba</a>
+        </div>
+    </div>
+</body>
+</html>
