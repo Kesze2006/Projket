@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BarkacsBolt")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c756330ff36aee9fb477ab959fce708ebc219238")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+46d0c61af1ff954d2c292f4e7e248bc447823f93")]
 [assembly: System.Reflection.AssemblyProductAttribute("BarkacsBolt")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BarkacsBolt")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
