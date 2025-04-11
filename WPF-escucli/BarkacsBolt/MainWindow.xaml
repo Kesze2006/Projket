@@ -1,0 +1,17 @@
+﻿<Window x:Class="BoltApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bolt Termékek" Height="350" Width="600">
+    <Grid>
+        <ListView Name="TermekLista" Margin="10">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Név" DisplayMemberBinding="{Binding Nev}" Width="150"/>
+                    <GridViewColumn Header="Kategória" DisplayMemberBinding="{Binding Kategoria}" Width="150"/>
+                    <GridViewColumn Header="Készlet" DisplayMemberBinding="{Binding Keszlet}" Width="80"/>
+                    <GridViewColumn Header="Ár (Ft)" DisplayMemberBinding="{Binding Ar}" Width="100"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>
