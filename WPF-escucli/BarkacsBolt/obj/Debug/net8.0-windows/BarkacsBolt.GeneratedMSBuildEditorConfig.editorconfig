@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = BarkacsBolt
-build_property.ProjectDir = D:\munkakönyvtár\Keszericze Ákos 12.C\Projket\WPF-escucli\BarkacsBolt\
+build_property.ProjectDir = D:\munkakönyvtár\Keszericze Ákos\Projket\WPF-escucli\BarkacsBolt\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
